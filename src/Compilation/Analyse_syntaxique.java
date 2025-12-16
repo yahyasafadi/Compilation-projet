@@ -63,7 +63,7 @@ public class Analyse_syntaxique {
             blocElse.children = bloc();
         }
 
-        if (currentToken.type != TokenType.FIN) throw new Exception("FIN attendu");
+        if (currentToken.type != TokenType.END) throw new Exception("FIN attendu");
         advance(); // FIN
 
         ASTNode node = new ASTNode("IF");
@@ -92,7 +92,7 @@ public class Analyse_syntaxique {
 
     private List<ASTNode> bloc() throws Exception {
         List<ASTNode> instrs = new java.util.ArrayList<>();
-        while (currentToken.type != TokenType.ELSE && currentToken.type != TokenType.FIN && currentToken.type != TokenType.DONE && currentToken.type != TokenType.EOF) {
+        while (currentToken.type != TokenType.ELSE && currentToken.type != TokenType.END && currentToken.type != TokenType.DONE && currentToken.type != TokenType.EOF) {
             instrs.add(instruction());
         }
         return instrs;

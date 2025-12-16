@@ -5,7 +5,7 @@ public class Analyse_lexical {
     public enum TokenType {
         NUMBER, ID, PLUS, MINUS, MUL, DIV, ASSIGN,
         LPAREN, RPAREN, EQ, LT, GT, LTE, GTE, NEQ, // Ajoutés pour compatibilité complète
-        IF, THEN, ELSE, WHILE, DO, DONE, FIN,
+        IF, THEN, ELSE, WHILE, DO, DONE, END,
         AND, OR, NOT, EOF
     }
 
@@ -28,7 +28,7 @@ public class Analyse_lexical {
             keywords.put("if", TokenType.IF); keywords.put("then", TokenType.THEN);
             keywords.put("else", TokenType.ELSE); keywords.put("while", TokenType.WHILE);
             keywords.put("do", TokenType.DO); keywords.put("done", TokenType.DONE);
-            keywords.put("fin", TokenType.FIN); keywords.put("AND", TokenType.AND);
+            keywords.put("END", TokenType.END); keywords.put("AND", TokenType.AND);
             keywords.put("OR", TokenType.OR); keywords.put("NOT", TokenType.NOT);
         }
 

@@ -19,7 +19,7 @@ public class Main_GUI {
         labelCode.setBounds(20, 10, 200, 20); // x, y, largeur, hauteur
         fenetre.add(labelCode);
 
-        JTextArea zoneCode = new JTextArea("a = 5\nb = 3\nif a > b then\n  c = a - b\nfin");
+        JTextArea zoneCode = new JTextArea("if a>0 :\nb = 3\nif a > b then\n  c = a - b\nfin");
         JScrollPane scrollCode = new JScrollPane(zoneCode);
         scrollCode.setBounds(20, 30, 540, 200); // On place la boite
         fenetre.add(scrollCode);
