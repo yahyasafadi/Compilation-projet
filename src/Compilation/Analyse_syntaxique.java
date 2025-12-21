@@ -1,5 +1,6 @@
 package Compilation;
 import java.util.List;
+import java.util.ArrayList;
 import Compilation.Analyse_lexical.Token;
 import Compilation.Analyse_lexical.TokenType;
 
@@ -15,11 +16,7 @@ public class Analyse_syntaxique {
 
     private void advance() {
         position++;
-        if (position < tokens.size()) {
-            currentToken = tokens.get(position);
-        } else {
-            currentToken = null;
-        }
+        currentToken = (position < tokens.size()) ? tokens.get(position) : null;
     }
 
     public ASTNode analyser() throws Exception {
@@ -39,9 +36,9 @@ public class Analyse_syntaxique {
 
     private ASTNode affectation() throws Exception {
         String varName = currentToken.value;
-        advance(); // ID
+        advance();
         if (currentToken.type != TokenType.ASSIGN) throw new Exception("= attendu");
-        advance(); // =
+        advance();
         ASTNode expr = expression();
         ASTNode node = new ASTNode("AFFECTATION", varName);
         node.addChild(expr);
@@ -49,22 +46,21 @@ public class Analyse_syntaxique {
     }
 
     private ASTNode conditionnelle() throws Exception {
-        advance(); // IF
+        advance(); // if
         ASTNode condition = expression();
-        if (currentToken.type != TokenType.THEN) throw new Exception("THEN attendu");
-        advance(); // THEN
+        if (currentToken.type != TokenType.THEN) throw new Exception("then attendu");
+        advance(); // then
+
         ASTNode blocIf = new ASTNode("BLOC");
         blocIf.children = bloc();
 
         ASTNode blocElse = null;
         if (currentToken.type == TokenType.ELSE) {
-            advance(); // ELSE
+            advance(); // else
             blocElse = new ASTNode("BLOC");
             blocElse.children = bloc();
         }
 
-        if (currentToken.type != TokenType.END) throw new Exception("FIN attendu");
-        advance(); // FIN
 
         ASTNode node = new ASTNode("IF");
         node.addChild(condition);
@@ -74,15 +70,17 @@ public class Analyse_syntaxique {
     }
 
     private ASTNode boucle() throws Exception {
-        advance(); // WHILE
+        advance(); // while
         ASTNode condition = expression();
-        if (currentToken.type != TokenType.DO) throw new Exception("DO attendu");
-        advance(); // DO
+        if (currentToken.type != TokenType.DO) throw new Exception("do attendu");
+        advance(); // do
+
         ASTNode blocWhile = new ASTNode("BLOC");
         blocWhile.children = bloc();
 
-        if (currentToken.type != TokenType.DONE) throw new Exception("DONE attendu");
-        advance(); // DONE
+        if (currentToken.type == TokenType.DONE) {
+            advance(); // On consomme 'done' s'il existe pour fermer la boucle proprement
+        }
 
         ASTNode node = new ASTNode("WHILE");
         node.addChild(condition);
@@ -91,13 +89,25 @@ public class Analyse_syntaxique {
     }
 
     private List<ASTNode> bloc() throws Exception {
-        List<ASTNode> instrs = new java.util.ArrayList<>();
-        while (currentToken.type != TokenType.ELSE && currentToken.type != TokenType.END && currentToken.type != TokenType.DONE && currentToken.type != TokenType.EOF) {
+        List<ASTNode> instrs = new ArrayList<>();
+        // Le bloc s'arrête s'il rencontre des mots réservés de structures de contrôle
+        while (currentToken != null &&
+                currentToken.type != TokenType.ELSE &&
+                currentToken.type != TokenType.DONE &&
+                currentToken.type != TokenType.EOF) {
+
+            // Sécurité : si c'est un IF ou WHILE, on traite l'instruction normalement
+            // mais on ne veut pas boucler indéfiniment
             instrs.add(instruction());
+
+            // Dans une version sans 'fin', on s'arrête souvent après une seule instruction
+            // ou on définit une règle de fin de ligne. Ici, on lit jusqu'au prochain mot clé.
+            if (currentToken.type == TokenType.IF || currentToken.type == TokenType.WHILE) break;
         }
         return instrs;
     }
 
+    // Les méthodes expression(), terme() et facteur() restent identiques...
     private ASTNode expression() throws Exception {
         ASTNode node = terme();
         while (currentToken.type == TokenType.PLUS || currentToken.type == TokenType.MINUS ||

@@ -23,6 +23,7 @@ public class Generation_code {
         } else if (node.type.equals("OP_BIN")) {
             generer(node.children.get(0));
             generer(node.children.get(1));
+            // Correspondance avec les opérateurs définis dans Analyse_syntaxique
             switch(node.value) {
                 case "+": instructions.add("ADD"); break;
                 case "-": instructions.add("SUB"); break;
@@ -40,9 +41,9 @@ public class Generation_code {
         } else if (node.type.equals("IF")) {
             String elseLabel = newLabel();
             String endLabel = newLabel();
-            generer(node.children.get(0)); // Cond
+            generer(node.children.get(0)); // Condition
             instructions.add("JZ " + elseLabel);
-            generer(node.children.get(1)); // Bloc IF
+            generer(node.children.get(1)); // Bloc THEN
             instructions.add("JUMP " + endLabel);
             instructions.add("LABEL " + elseLabel);
             if (node.children.size() > 2) generer(node.children.get(2)); // Bloc ELSE
@@ -51,9 +52,9 @@ public class Generation_code {
             String startLabel = newLabel();
             String endLabel = newLabel();
             instructions.add("LABEL " + startLabel);
-            generer(node.children.get(0)); // Cond
+            generer(node.children.get(0)); // Condition
             instructions.add("JZ " + endLabel);
-            generer(node.children.get(1)); // Bloc
+            generer(node.children.get(1)); // Corps de la boucle
             instructions.add("JUMP " + startLabel);
             instructions.add("LABEL " + endLabel);
         }
