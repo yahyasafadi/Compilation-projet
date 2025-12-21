@@ -4,9 +4,9 @@ import java.util.*;
 public class Analyse_lexical {
     public enum TokenType {
         NUMBER, ID, PLUS, MINUS, MUL, DIV, ASSIGN,
-        LPAREN, RPAREN, EQ, LT, GT, LTE, GTE, NEQ, // Ajoutés pour compatibilité complète
-        IF, THEN, ELSE, WHILE, DO, DONE, END,
-        AND, OR, NOT, EOF
+        LPAREN, RPAREN, EQ, LT, GT, LTE, GTE, NEQ,
+        IF, THEN, ELSE, WHILE, DO, DONE, AND, OR, NOT, EOF
+
     }
 
     public static class Token {
@@ -25,11 +25,16 @@ public class Analyse_lexical {
 
         static {
             keywords = new HashMap<>();
-            keywords.put("if", TokenType.IF); keywords.put("then", TokenType.THEN);
-            keywords.put("else", TokenType.ELSE); keywords.put("while", TokenType.WHILE);
-            keywords.put("do", TokenType.DO); keywords.put("done", TokenType.DONE);
-            keywords.put("END", TokenType.END); keywords.put("AND", TokenType.AND);
-            keywords.put("OR", TokenType.OR); keywords.put("NOT", TokenType.NOT);
+            // Tous les mots-clés sont enregistrés en minuscules
+            keywords.put("if", TokenType.IF);
+            keywords.put("then", TokenType.THEN);
+            keywords.put("else", TokenType.ELSE);
+            keywords.put("while", TokenType.WHILE);
+            keywords.put("do", TokenType.DO);
+            keywords.put("done", TokenType.DONE);
+            keywords.put("and", TokenType.AND);
+            keywords.put("or", TokenType.OR);
+            keywords.put("not", TokenType.NOT);
         }
 
         public Lexer(String input) {
@@ -89,7 +94,10 @@ public class Analyse_lexical {
             while (Character.isLetterOrDigit(currentChar) || currentChar == '_') {
                 sb.append(currentChar); advance();
             }
-            return new Token(keywords.getOrDefault(sb.toString(), TokenType.ID), sb.toString());
+            String val = sb.toString();
+            // On vérifie la correspondance en ignorant la casse
+            TokenType type = keywords.get(val.toLowerCase());
+            return new Token(type != null ? type : TokenType.ID, val);
         }
     }
 }

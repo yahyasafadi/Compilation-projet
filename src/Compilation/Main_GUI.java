@@ -8,23 +8,21 @@ public class Main_GUI {
 
     public static void main(String[] args) {
 
-        // 1. Créer la fenêtre
         JFrame fenetre = new JFrame("Mon Compilateur");
-        fenetre.setSize(600, 700); // Largeur: 600, Hauteur: 700
-        fenetre.setLayout(null);   // IMPORTANT : On désactive le placement automatique
+        fenetre.setSize(600, 700);
+        fenetre.setLayout(null);
         fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // 2. Créer la zone de texte pour écrire le code (En haut)
-        JLabel labelCode = new JLabel("Écrivez votre code ici :");
-        labelCode.setBounds(20, 10, 200, 20); // x, y, largeur, hauteur
+        JLabel labelCode = new JLabel("Écrivez votre code ici ");
+        labelCode.setBounds(20, 10, 400, 20);
         fenetre.add(labelCode);
 
-        JTextArea zoneCode = new JTextArea("if a>0 :\nb = 3\nif a > b then\n  c = a - b\nfin");
+        // Exemple mis à jour : "IF" en majuscule, pas de "fin" à la fin du bloc
+        JTextArea zoneCode = new JTextArea("IF a > 0 THEN\n  b = 3\n  c = a - b\nelse\n  b = 0");
         JScrollPane scrollCode = new JScrollPane(zoneCode);
-        scrollCode.setBounds(20, 30, 540, 200); // On place la boite
+        scrollCode.setBounds(20, 30, 540, 200);
         fenetre.add(scrollCode);
 
-        // 3. Créer les 4 boutons (Au milieu)
         JButton btnLexical = new JButton("Lexical");
         btnLexical.setBounds(20, 240, 120, 30);
         fenetre.add(btnLexical);
@@ -41,98 +39,68 @@ public class Main_GUI {
         btnGenerer.setBounds(410, 240, 120, 30);
         fenetre.add(btnGenerer);
 
-        // 4. Créer la zone de résultat (En bas)
         JLabel labelResultat = new JLabel("Résultat :");
         labelResultat.setBounds(20, 280, 200, 20);
         fenetre.add(labelResultat);
 
         JTextArea zoneResultat = new JTextArea();
+        zoneResultat.setEditable(false);
         JScrollPane scrollResultat = new JScrollPane(zoneResultat);
         scrollResultat.setBounds(20, 300, 540, 300);
         fenetre.add(scrollResultat);
 
-        // ==========================================
-        // 5. DONNER VIE AUX BOUTONS (Les Actions)
-        // ==========================================
+        // --- Logique des Boutons ---
 
-        // --- Bouton Lexical ---
-        btnLexical.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String texte = zoneCode.getText();
-                    Analyse_lexical.Lexer lexer = new Analyse_lexical.Lexer(texte);
-                    List<Analyse_lexical.Token> tokens = lexer.tokenize();
-
-                    zoneResultat.setText("Tokens trouvés :\n" + tokens.toString());
-                } catch (Exception ex) {
-                    zoneResultat.setText("Erreur : " + ex.getMessage());
-                }
+        btnLexical.addActionListener(e -> {
+            try {
+                Analyse_lexical.Lexer lexer = new Analyse_lexical.Lexer(zoneCode.getText());
+                List<Analyse_lexical.Token> tokens = lexer.tokenize();
+                zoneResultat.setText("Tokens trouvés (Normalisés) :\n" + tokens.toString());
+            } catch (Exception ex) {
+                zoneResultat.setText("Erreur Lexicale : " + ex.getMessage());
             }
         });
 
-        // --- Bouton Syntaxique ---
-        btnSyntaxique.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String texte = zoneCode.getText();
-                    Analyse_lexical.Lexer lexer = new Analyse_lexical.Lexer(texte);
-                    List<Analyse_lexical.Token> tokens = lexer.tokenize();
-                    Analyse_syntaxique syntaxique = new Analyse_syntaxique(tokens);
-                    ASTNode arbre = syntaxique.analyser();
-
-                    zoneResultat.setText("Arbre Syntaxique :\n" + arbre.toString());
-                } catch (Exception ex) {
-                    zoneResultat.setText("Erreur : " + ex.getMessage());
-                }
+        btnSyntaxique.addActionListener(e -> {
+            try {
+                Analyse_lexical.Lexer lexer = new Analyse_lexical.Lexer(zoneCode.getText());
+                Analyse_syntaxique syntaxique = new Analyse_syntaxique(lexer.tokenize());
+                ASTNode arbre = syntaxique.analyser();
+                zoneResultat.setText("Arbre Syntaxique :\n" + arbre.toString());
+            } catch (Exception ex) {
+                zoneResultat.setText("Erreur Syntaxique : " + ex.getMessage());
             }
         });
 
-        // --- Bouton Sémantique ---
-        btnSemantique.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    // On refait lexical + syntaxique d'abord
-                    String texte = zoneCode.getText();
-                    Analyse_lexical.Lexer lexer = new Analyse_lexical.Lexer(texte);
-                    List<Analyse_lexical.Token> tokens = lexer.tokenize();
-                    Analyse_syntaxique syntaxique = new Analyse_syntaxique(tokens);
-                    ASTNode arbre = syntaxique.analyser();
-
-                    // Puis sémantique
-                    Analyse_semantique sem = new Analyse_semantique();
-                    sem.analyser(arbre);
-
-                    zoneResultat.setText("Table des symboles :\n" + sem.tableSymboles.toString());
-                } catch (Exception ex) {
-                    zoneResultat.setText("Erreur : " + ex.getMessage());
-                }
+        btnSemantique.addActionListener(e -> {
+            try {
+                Analyse_lexical.Lexer lexer = new Analyse_lexical.Lexer(zoneCode.getText());
+                Analyse_syntaxique syntaxique = new Analyse_syntaxique(lexer.tokenize());
+                ASTNode arbre = syntaxique.analyser();
+                Analyse_semantique sem = new Analyse_semantique();
+                sem.analyser(arbre);
+                zoneResultat.setText("Table des symboles :\n" + sem.tableSymboles.toString());
+            } catch (Exception ex) {
+                zoneResultat.setText("Erreur Sémantique : " + ex.getMessage());
             }
         });
 
-        // --- Bouton Génération ---
-        btnGenerer.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String texte = zoneCode.getText();
-                    Analyse_lexical.Lexer lexer = new Analyse_lexical.Lexer(texte);
-                    List<Analyse_lexical.Token> tokens = lexer.tokenize();
-                    Analyse_syntaxique syntaxique = new Analyse_syntaxique(tokens);
-                    ASTNode arbre = syntaxique.analyser();
-
-                    Generation_code gen = new Generation_code();
-                    gen.generer(arbre);
-
-                    zoneResultat.setText("Code Assembler généré :\n");
-                    for(String ligne : gen.instructions) {
-                        zoneResultat.append(ligne + "\n");
-                    }
-                } catch (Exception ex) {
-                    zoneResultat.setText("Erreur : " + ex.getMessage());
+        btnGenerer.addActionListener(e -> {
+            try {
+                Analyse_lexical.Lexer lexer = new Analyse_lexical.Lexer(zoneCode.getText());
+                Analyse_syntaxique syntaxique = new Analyse_syntaxique(lexer.tokenize());
+                ASTNode arbre = syntaxique.analyser();
+                Generation_code gen = new Generation_code();
+                gen.generer(arbre);
+                zoneResultat.setText("Code Assembleur généré :\n");
+                for(String ligne : gen.instructions) {
+                    zoneResultat.append(ligne + "\n");
                 }
+            } catch (Exception ex) {
+                zoneResultat.setText("Erreur de Génération : " + ex.getMessage());
             }
         });
 
-        // 6. Afficher la fenêtre à la fin
         fenetre.setVisible(true);
     }
 }
